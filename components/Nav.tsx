@@ -8,7 +8,8 @@ import { ClientSafeProvider, LiteralUnion } from "next-auth/react/types";
 import { BuiltInProviderType } from "next-auth/providers";
 
 const Nav = () => {
-  const isUserLoggedIn = true;
+  const { data: session } = useSession();
+
   const [providers, setProviders] = useState<Record<
     LiteralUnion<BuiltInProviderType, string>,
     ClientSafeProvider
@@ -16,11 +17,11 @@ const Nav = () => {
   const [toggleDropdown, setToggleDropdown] = useState(false);
 
   useEffect(() => {
-    const assignProvider = async () => {
+    const assignProviders = async () => {
       const response = await getProviders();
       setProviders(response);
     };
-    assignProvider();
+    assignProviders();
   }, []);
 
   return (
@@ -32,16 +33,22 @@ const Nav = () => {
 
       {/* Desktop Navigation */}
       <div className="sm:flex hidden">
-        {isUserLoggedIn ? (
+        {session?.user ? (
           <div className="flex gap-3 md:gap-5">
             <Link href="/create-prompt" className="black_btn">
               Create Post
             </Link>
-            <button type="button" onClick={(event) => signOut} className="outline_btn">
+            <button type="button" onClick={() => signOut()} className="outline_btn">
               Sign Out
             </button>
             <Link href="/profile">
-              <Image src="/assets/images/logo.svg" width={37} height={37} className="rounded-full" alt="profile" />
+              <Image
+                src={session.user.image || "/assets/images/user.svg"}
+                width={37}
+                height={37}
+                className="rounded-full"
+                alt="profile"
+              />
             </Link>
           </div>
         ) : (
@@ -58,11 +65,11 @@ const Nav = () => {
 
       {/* Mobile Navigation */}
       <div className="sm:hidden flex relative">
-        {isUserLoggedIn ? (
+        {session?.user ? (
           <div className="flex">
             <Image
               alt="Promptopia Logo"
-              src="/assets/images/logo.svg"
+              src={session.user.image || "/assets/images/user.svg"}
               width={30}
               height={30}
               className="object-contain"
